@@ -1,0 +1,18 @@
+#VIP
+vip: 172.30.17.60
+vip_hostname: k8s-vip
+
+##Hostnames and IPS
+master1_hostname: k8s-master-1
+master1_ip: 172.30.17.61
+master2_hostname: k8s-master-2
+master2_ip: 172.30.17.62
+master3_hostname: k8s-master-3
+master3_ip: 172.30.17.63
+
+##Nodes and IPs
+node1_name: k8s-node-1
+node1_ip: 172.30.17.64
+node2_name: k8s-node-2
+node2_ip: 172.30.17.65
+
