@@ -1,5 +1,5 @@
 #!/bin/bash
-#Alpha
+##Alpha
 ansible-playbook -i hosts k-alpha.yml -e 'ansible_user=root ansible_password=root_password'
 
 #Masters
