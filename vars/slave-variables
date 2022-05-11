@@ -15,12 +15,6 @@ packages:
     required: yes
   - name: docker-ce
     required: yes
-  - name: docker-ce-cli
-    required: yes
-  - name: containerd.io
-    required: yes
-  - name: yum-utils
-    required: yes
   - name: kubeadm
     required: yes
 
