@@ -117,7 +117,7 @@ ansible-playbook -i '192.168.29.235', -e 'host_name=k8s-node-2 ansible_user=root
 
 Above file contains needed environmental files and make sure you have changed the network interface name as ens33/ens192 in the vars/ directory for each files.
 ## Execution steps
-Create another jump server with needed packages like kubectl, ansible and general packages. 
+Create another jump server with needed packages like kubectl, ansible and general packages. Clone all this repository to a local location.
 Simple 5 machine setup is ./deploy, thats it. It will slowly create machines configurations and installations as per this script.
 
 Copy the file contents of kconf/admin.conf to ~/.kube/config and add the VIP to the hosts file with the hostname and the IP of the VIP as mentioned in config file.
