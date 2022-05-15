@@ -24,6 +24,22 @@ The rest of network configuration and other settings will automatically replicat
 ### k-slave.yml
 This ansible script adds a kubernetes slave machine with the necessary packages as well as settings in the machine. the slave/worker node joining string will be executed and confirms the addition of this worker node. 
 
+### Files under templates/
+Following will be added to the recipient machines.
+cat remote_hosts.tmpl
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+#Local Kubernetes entries
+{{ vip }}  {{ vip_hostname}}
+{{ master1_ip }}   {{ master1_hostname }}
+{{ master2_ip }}   {{ master2_hostname }}
+{{ master3_ip }}   {{ master3_hostname }}
+{{ node1_ip }}   {{ node1_name }}
+{{ node2_ip }}   {{ node2_name }}
+
+### Files under vars
+related to alpha, master and metallb related values resides here.
+
 ## Verify the status
 Once added all machines in we can see node details.
 ```
@@ -84,9 +100,27 @@ replicaset.apps/coredns-64897985d                   2         2         2       
 ```
 ## Procedure Steps
 ### ./deploy.sh
+#!/bin/bash
+#Alpha
+ansible-playbook -i hosts k-alpha.yml -e 'ansible_user=root ansible_password=root_password'
 
+#Masters
+ansible-playbook -i '192.168.29.232', -e 'host_name=k8s-master-2 p_value=254 ansible_user=root ansible_password=root_password' k-master.yml
+ansible-playbook -i '192.168.29.233', -e 'host_name=k8s-master-3 p_value=253 ansible_user=root ansible_password=root_password' k-master.yml
 
+#Slave
+ansible-playbook -i '192.168.29.234', -e 'host_name=k8s-node-1 ansible_user=root ansible_password=root_password' k-slave.yml
+ansible-playbook -i '192.168.29.235', -e 'host_name=k8s-node-2 ansible_user=root ansible_password=root_password' k-slave.yml
+
+Above file contains needed environmental files and make sure you have changed the network interface name as ens33/ens192 in the vars/ directory for each files.
 ## Execution steps
+Create another jump server with needed packages like kubectl, ansible and general packages. 
+Simple 5 machine setup is ./deploy, thats it. It will slowly create machines configurations and installations as per this script.
 
-
+Copy the file contents of kconf/admin.conf to ~/.kube/config and add the VIP to the hosts file with the hostname and the IP of the VIP as mentioned in config file.
 ## Result
+A multimaster machine with 3 masters and 2 nodes are ready for your needs.
+
+#### Things you need to do.
+1. Add a storage class for PVCs, you can use the provider as you like.
+Note: Will come with new section of SC with NFS backed with SSDs.
