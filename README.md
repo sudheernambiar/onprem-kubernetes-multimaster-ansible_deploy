@@ -17,10 +17,12 @@ Once initiated the multimaster cluster with pod and service network, the joining
 Once installation done under the folder kconf/ you can see the config file for adding another machine to access the cluster via VIP. Adding the configuration ~/.kube/config file and adding in the /etc/hosts with VIP hostname and IP will help to work it. Note that the jump server here we mentioned must need kubectl to be installed to access the cluster.
 
 ### k-master.yml
-Installing the reset of all master servers with installation configurations mentioned here.
+Installing the rest of all master servers with installation configurations mentioned here. In this setup along with alpha master those master configuration joining string also executed. haproxy as well as keepalived also configured with coresponding network interface and priority number.(these special values been entered in pilot mode during ansible script execution (./deploy.sh).
+
+the rest of network configuration and other settings will automatically replicated in this master machine as well.
 
 ### k-slave.yml
-
+This ansible script adds a kubernetes slave machine with the necessary packages as well as settings in the machine. the slave/worker node joining string will be executed and confirms the addition of this worker node.
 ## Procedure Steps
 ### ./deploy.sh
 
