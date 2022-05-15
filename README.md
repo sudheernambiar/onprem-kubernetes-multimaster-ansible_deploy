@@ -99,7 +99,9 @@ replicaset.apps/coredns-64897985d                   2         2         2       
 
 ```
 ## Procedure Steps
-### ./deploy.sh
+### Deploy
+```
+./deploy.sh
 #!/bin/bash
 #Alpha
 ansible-playbook -i hosts k-alpha.yml -e 'ansible_user=root ansible_password=root_password'
@@ -111,6 +113,7 @@ ansible-playbook -i '192.168.29.233', -e 'host_name=k8s-master-3 p_value=253 ans
 #Slave
 ansible-playbook -i '192.168.29.234', -e 'host_name=k8s-node-1 ansible_user=root ansible_password=root_password' k-slave.yml
 ansible-playbook -i '192.168.29.235', -e 'host_name=k8s-node-2 ansible_user=root ansible_password=root_password' k-slave.yml
+```
 
 Above file contains needed environmental files and make sure you have changed the network interface name as ens33/ens192 in the vars/ directory for each files.
 ## Execution steps
