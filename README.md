@@ -1,6 +1,6 @@
 # onprem-kubernetes-multimaster
 On premise multimaster kubernetes cluster with ansible script
-
+![alt text](onPremKube.png)
 ## Prerequisites 
 - VMWare ESXi / VMS build with CentOS7 with following specs.
   - Alpha Server(Master Server 1) - Initiates kubernetes cluster starts. 
