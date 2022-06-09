@@ -1,7 +1,7 @@
 ---
 - name: "Install alpha master"
   hosts: alpha
-  vars_files: 
+  vars_files:
     - vars/alph-variables
     - vars/metallb
     - vars/host_values
@@ -12,11 +12,29 @@
         src: templates/kubernetes.repo
         dest: /etc/yum.repos.d/kubernetes.repo
 
-    - name: "Install yum-utils"
+#Get ready with necessary packages
+    - name: "Install yum-utils and chrony"
       yum:
-        name: yum-utils
+        name:
+          - yum-utils
+          - chrony
         state: latest
         update_cache: True
+
+#Timedatctl sync
+    - name: Set timezone to Asia/Kolkata
+      timezone:
+        name: Asia/Kolkata
+
+    - name: ntp sync.
+      shell:
+        cmd: 'timedatectl set-ntp true'
+
+    - name: restart chrony
+      systemd:
+        name: chronyd
+        state: restarted
+        enabled: yes
 
     - name: "Alpha master repos to docker"
       shell:
@@ -31,7 +49,7 @@
         name: "*"
         state: present
         update_cache: true
-        
+
     - name: " {{ item.name }} install packages"
       yum:
         name: "{{ item.name }}"
@@ -54,9 +72,9 @@
         enabled: yes
 
     - name: "Alpha master change docker drive to systemd"
-      lineinfile: 
-        path: /usr/lib/systemd/system/docker.service 
-        regexp: '^(.*)ExecStart=(.*)$' 
+      lineinfile:
+        path: /usr/lib/systemd/system/docker.service
+        regexp: '^(.*)ExecStart=(.*)$'
         line: 'ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --exec-opt native.cgroupdriver=systemd'
         backrefs: yes
 
@@ -72,21 +90,6 @@
       shell:
         cmd: 'echo -e "[Service]\nCPUAccounting=true\nMemoryAccounting=true" > /etc/systemd/system/kubelet.service.d/11-cgroups.conf'
 
-
-#NTP update
-    - name: "Alpha master NTP Date to crone"
-      cron:
-        name: "Time Update"
-        minute: "*"
-        job: "ntpdate time.apple.com"
-
-    - name: "Alpha master restart cron"
-      systemd:
-        name: crond
-        state: restarted
-        enabled: true
-
-
 #Disable SE Linux
     - name: "Alpha master disable SELinux"
       selinux:
@@ -99,8 +102,8 @@
 
 #Add hosts file contents
     - name: "Alpha master copy the content to remote etc_hosts"
-      template: 
-        src: templates/remote_hosts.tmpl 
+      template:
+        src: templates/remote_hosts.tmpl
         dest: /etc/hosts
         mode: 644
         owner: root
@@ -121,10 +124,6 @@
           delay=10
           timeout=60
       when: sestatus.changed == true
-
-#Clean old kernels
-    - name: "Alpha master cleanup old kernels"
-      command: 'package-cleanup --oldkernels --count=1'
 
 # Add firewall rules
     - name: "Alpha master implement firewall rules"
@@ -231,12 +230,13 @@
         state: restarted
         enabled: yes
 
+#Initiate the cluster
     - name: "Alpha master start kubernetes cluster"
       command: 'kubeadm init --pod-network-cidr=10.244.0.0/16 --service-cidr=10.18.0.0/24 --control-plane-endpoint "k8s-vip:8443" --upload-certs'
       register: kube_init
 
-    - local_action: 
-        module: copy 
+    - local_action:
+        module: copy
         content: "{{ kube_init.stdout_lines }}"
         dest: output
 
@@ -249,7 +249,7 @@
         mode: '0755'
 
     - name: "Alpha master Copy conf to local .kube/config"
-      copy: 
+      copy:
         src: '/etc/kubernetes/admin.conf'
         dest: '~/.kube/config'
         remote_src: yes
@@ -267,7 +267,7 @@
 #Ready with Container network
 #    - name: "Apply network"
 #      shell:
-#        cmd: "export kubever=$(kubectl version | base64 | tr -d '\n'); kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$kubever" 
+#        cmd: "export kubever=$(kubectl version | base64 | tr -d '\n'); kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$kubever"
 
 #Canal/calico n/w deployment
     - name: "Apply network Canal"
@@ -367,4 +367,3 @@
         src: slave_string
         dest: ~/slave_string.sh
         mode: 755
-
